@@ -11,7 +11,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  hs-source-dirs:      src
+  hs-source-dirs:      src, .
   exposed-modules:     Hatlab.Plot,
                        Hatlab.Relations,
                        Hatlab.ParametrizedCurves,
