@@ -10,12 +10,13 @@ polarCurve r_fun interval name = Par (\theta -> (cos theta)*(r_fun theta)) (\the
 
 instance Plottable Parametrized where
     plot [] = return ()
-    plot rs = do plotCmd ["set size ratio -1\n"] 
+    plot rs = do clear
+                 plotCmd ["set size ratio -1\n"] 
                  plotCmd [headers rs]
                  plotCmd (map ((++"e\n") . p) rs)
 
         where
-            headers (r : rs) = "clear\nplot ["++(show (min_v r))++":"++(show (max_v r))++"] "
+            headers (r : rs) = "plot ["++(show min_v)++":"++(show max_v)++"] "
                                ++ concat (map (\x -> x++", ") (header "'-' " r : map (header "'' ") rs))
             header str r = str ++ " w l lw 2 t " ++ (show (label r))
 
@@ -27,14 +28,8 @@ instance Plottable Parametrized where
 
             show_ (x, y) = show x ++ " " ++ show y ++ "\n"
 
-            min_v :: Parametrized -> Double
-            min_v r = minimum ((map fst (ps r))++(map snd (ps r)))
+            min_v :: Double
+            min_v = minimum ((map fst (concatMap ps rs))++(map snd (concatMap ps rs)))
 
-            max_v :: Parametrized -> Double
-            max_v r = maximum ((map fst (ps r))++(map snd (ps r)))
-
-lspace :: Int -> (Double, Double) -> [Double]
-lspace n (a, b) = itr n (\x -> x+h) a
-    where
-        h = (b-a)/(fromIntegral (n-1))
-        itr n = (take n .) . iterate
+            max_v :: Double
+            max_v = maximum ((map fst (concatMap ps rs))++(map snd (concatMap ps rs)))

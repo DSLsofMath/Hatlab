@@ -45,12 +45,13 @@ fold g (In x) = g (fmap (fold g) x)
 
 instance Plottable (Deep Relation) where
     plot [] = return ()
-    plot rs = do plotCmd ["set size ratio -1\n"]
+    plot rs = do clear
+                 plotCmd ["set size ratio -1\n"]
                  plotCmd [headers rs]
                  plotCmd (map ((++"e\n") . p) rs)
 
         where
-            headers (r : rs) = "clear\nplot [-2:2] "
+            headers (r : rs) = "plot [-2:2] "
                                ++ concatMap (\x -> x++", ")
                                             (header "'-' " r : map (header "'' ") rs)
             header str r = str ++ " w p pt 7 t " ++ show (fold label r)
@@ -63,12 +64,6 @@ instance Plottable (Deep Relation) where
                           , y <- lspace resolution (-2.0, 2.0)]
 
             show_ (x, y) = show x ++ " " ++ show y ++ "\n"
-
-lspace :: Int -> (Double, Double) -> [Double]
-lspace n (a, b) = itr n (\x -> x+h) a
-    where
-        h = (b-a)/fromIntegral (n-1)
-        itr n = (take n .) . iterate
 
 instance Show (Deep Relation) where
     show = fold label

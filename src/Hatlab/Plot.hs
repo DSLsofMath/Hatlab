@@ -45,11 +45,14 @@ data BasicPlot = Fun  (Double -> Double) String
                | Pts  (V.Vector Double)  (Double -> Double) String
                | Pts2 (V.Vector Double)  (V.Vector Double) String
 
+clear = plotCmd ["clear\n"]
+
 instance Plottable BasicPlot where
   plot [] = return ()
-  plot fs = do plotCmd [headers fs]
+  plot fs = do clear
+               plotCmd [headers fs]
                plotCmd (map ((++"e\n") . p) fs)
-    where headers (f : fs) = "clear\nplot ["++show a++":"++show b++"] "
+    where headers (f : fs) = "plot ["++show a++":"++show b++"] "
                               ++ concat (intersperse ", " (header "'-' " f : map (header "'' ") fs))
           -- In this downscaled version (a,b) is always (-1,1)  ...
               where (a,b) = case f of
@@ -67,6 +70,11 @@ instance Plottable BasicPlot where
           plotFun xs ys =  V.ifoldr g "\n" xs
               where g i x ack = show x ++ " " ++ show (ys V.! i) ++ "\n" ++ ack
 
+lspace :: Int -> (Double, Double) -> [Double]
+lspace n (a, b) = itr n (\x -> x+h) a
+    where
+        h = (b-a)/fromIntegral (n-1)
+        itr n = (take n .) . iterate
 
 linspace n (a,b) = V.generate n (\k -> a + fromIntegral (k-1) * h)
        where h = (b-a)/fromIntegral (n-1)
