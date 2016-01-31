@@ -15,6 +15,7 @@ library
   exposed-modules:     Hatlab.Plot,
                        Hatlab.Relations,
                        Hatlab.ParametricCurves,
+                       Hatlab.Derivatives,
                        Examples.Shapes,
                        Examples.Parametric,
                        Examples.Sets
