@@ -1,5 +1,5 @@
 name:                Hatlab
-version:             0.2.0.0
+version:             0.2.1
 -- homepage:            http://github.com/githubuser/Hatlab#readme
 -- license:             BSD3
 -- license-file:        LICENSE
@@ -14,9 +14,9 @@ library
   hs-source-dirs:      src, .
   exposed-modules:     Hatlab.Plot,
                        Hatlab.Relations,
-                       Hatlab.ParametrizedCurves,
+                       Hatlab.ParametricCurves,
                        Examples.Shapes,
-                       Examples.Parametrized,
+                       Examples.Parametric,
                        Examples.Sets
   build-depends:       base >= 4.7 && < 5
                      , vector

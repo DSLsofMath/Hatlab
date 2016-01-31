@@ -1,14 +1,14 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Hatlab.ParametrizedCurves where
+module Hatlab.ParametricCurves where
 
 import Hatlab.Plot
 
-data Parametrized = Par {x_t :: Double -> Double, y_t :: Double -> Double, interval :: (Double, Double), label :: String}
+data Parametric = Par {x_t :: Double -> Double, y_t :: Double -> Double, interval :: (Double, Double), label :: String}
 
-polarCurve :: (Double -> Double) -> (Double, Double) -> String -> Parametrized
+polarCurve :: (Double -> Double) -> (Double, Double) -> String -> Parametric
 polarCurve r_fun interval name = Par (\theta -> (cos theta)*(r_fun theta)) (\theta -> (sin theta)*(r_fun theta)) interval name
 
-instance Plottable Parametrized where
+instance Plottable Parametric where
     plot [] = return ()
     plot rs = do clear
                  plotCmd ["set size ratio -1\n"] 
@@ -23,7 +23,7 @@ instance Plottable Parametrized where
             resolution = 4000
 
             p r = concatMap show_ $ ps r
-            
+
             ps r = [(x_t r t, y_t r t) | t <- lspace resolution (interval r)]
 
             show_ (x, y) = show x ++ " " ++ show y ++ "\n"
