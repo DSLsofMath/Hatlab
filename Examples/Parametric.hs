@@ -1,6 +1,6 @@
-module Examples.Parametrized where
+module Examples.Parametric where
 import Hatlab.Plot
-import Hatlab.ParametrizedCurves
+import Hatlab.ParametricCurves
 
 circle r = Par (\t -> r*cos t) (\t -> r*sin t) (-2*pi, 2*pi) "Circle"
 
