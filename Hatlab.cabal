@@ -26,7 +26,6 @@ library
 
 test-suite tests
   type: exitcode-stdio-1.0
---  hs-source-dirs: src, .
   build-depends: base
                , Hatlab
                , QuickCheck
