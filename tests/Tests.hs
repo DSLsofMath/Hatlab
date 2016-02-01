@@ -1,3 +1,5 @@
+module Main where
+
 import Hatlab.Derivatives
 import Test.QuickCheck
 
@@ -22,3 +24,5 @@ instance Arbitrary Expression where
                             n' = n `div` 2
 
 prop_simplify e x = evalFun e x == evalFun (simplify e) x
+
+main = quickCheck prop_simplify

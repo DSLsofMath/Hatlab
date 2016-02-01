@@ -23,3 +23,11 @@ library
                      , vector
                      , process
   default-language:    Haskell2010
+
+test-suite tests
+  type: exitcode-stdio-1.0
+--  hs-source-dirs: src, .
+  build-depends: base
+               , Hatlab
+               , QuickCheck
+  main-is: tests/Tests.hs
