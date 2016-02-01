@@ -14,6 +14,7 @@ data Expression = Add  Expression Expression
                 | Sqrt Expression
                 | Ln   Expression
                 | X
+
 x       = X
 v d     = V d
 e .+. f = Add e f
@@ -33,7 +34,7 @@ instance Num Expression where
     (-) = (.-.)
 
     negate e = 0 .-. e
-    abs e    = sqrte (e .^. 2)
+    abs e    = sqrte (e * e)
     signum e = e ./. (abs e)
 
     fromInteger = v . fromInteger
@@ -48,15 +49,15 @@ instance Fractional Expression where
 derivative :: Expression -> Expression
 derivative (V d)     = 0
 derivative X         = 1
-derivative (Add a b) = simplify $ (derivative a) .+. (derivative b)
-derivative (Sub a b) = simplify $ (derivative a) .-. (derivative b)
-derivative (Mul a b) = simplify $ (a .*. (derivative b)) .+. ((derivative a) .*. b)
-derivative (Div a b) = simplify $ ((b .*. (derivative a)) .-. (a .*. (derivative b))) ./. (b .*. b)
-derivative (Pow f g) = simplify $ (f .^. g) .*. (derivative g) .*. (ln f) .+. ((f .^. (g .-. 1)) .*. g .*. (derivative f))
-derivative (Sin e)   = simplify $ (derivative e) .*. (cose e)
-derivative (Cos e)   = simplify $ 0 .-. (sine e)
+derivative (Add a b) = simplify $ (derivative a) + (derivative b)
+derivative (Sub a b) = simplify $ (derivative a) - (derivative b)
+derivative (Mul a b) = simplify $ (a * (derivative b)) + ((derivative a) * b)
+derivative (Div a b) = simplify $ ((b .*. (derivative a)) - (a * (derivative b))) / (b * b)
+derivative (Pow f g) = simplify $ (f .^. g) * (derivative g) * (ln f) + ((f .^. (g - 1)) * g * (derivative f))
+derivative (Sin e)   = simplify $ (derivative e) * (cose e)
+derivative (Cos e)   = simplify $ 0 - (sine e)
 derivative (Sqrt e)  = simplify $ derivative (e .^. 0.5)
-derivative (Ln e)    = simplify $ (derivative e) ./. e
+derivative (Ln e)    = simplify $ (derivative e) / e
 
 evalFun :: Expression -> Double -> Maybe Double
 evalFun (V d) x     = Just d 
