@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Hatlab.Derivatives where
 
+import Control.Monad (guard)
+
 import Hatlab.Plot
 
 data Expression = Add  Expression Expression
@@ -42,7 +44,6 @@ instance Num Expression where
 instance Fractional Expression where
 
     (/)     = (./.)
-    recip e = 1/e
 
     fromRational = v . fromRational
 
@@ -60,17 +61,34 @@ derivative (Sqrt e)  = simplify $ derivative (e .^. 0.5)
 derivative (Ln e)    = simplify $ (derivative e) / e
 
 evalFun :: Expression -> Double -> Maybe Double
-evalFun (V d) x     = Just d 
+evalFun (V d) x     = Just d
 evalFun X x         = Just x
-evalFun (Add a b) x = pure (+)  <*> (evalFun a x) <*> (evalFun b x)
-evalFun (Mul a b) x = pure (*)  <*> (evalFun a x) <*> (evalFun b x)
-evalFun (Sub a b) x = pure (-)  <*> (evalFun a x) <*> (evalFun b x)
-evalFun (Div a b) x = pure (/)  <*> (evalFun a x) <*> ((evalFun b x) >>= (\x -> if x == 0 then Nothing else Just x))
-evalFun (Pow a b) x = pure (**) <*> ((evalFun a x) >>= (\x -> if x >= 0 then Just x else Nothing))  <*>  (evalFun b x)
-evalFun (Sqrt a)  x = fmap sqrt $ (evalFun a x) >>= (\x -> if x <= 0 then Nothing else Just x)
-evalFun (Cos a)   x = fmap cos  (evalFun a x)
-evalFun (Sin a)   x = fmap sin  (evalFun a x)
-evalFun (Ln a)    x = fmap log  $ (evalFun a x) >>= (\x -> if x <= 0 then Nothing else Just x)
+evalFun (Add a b) x = (+)  <$> evalFun a x <*> (evalFun b x)
+evalFun (Mul a b) x = (*)  <$> evalFun a x <*> (evalFun b x)
+evalFun (Sub a b) x = (-)  <$> evalFun a x <*> (evalFun b x)
+evalFun (Div a b) x = do
+  a' <- evalFun a x
+  b' <- evalFun b x
+  guard (b' /= 0)
+  return (a' / b')
+
+evalFun (Pow a b) x = do
+  a' <- evalFun a x
+  guard (a' >= 0)
+  b' <- evalFun b x
+  return (a' ** b')
+
+evalFun (Sqrt a)  x = do
+  a' <- evalFun a x
+  guard (a' <= 0)
+  return (sqrt a')
+
+evalFun (Cos a)   x = cos  <$> evalFun a x
+evalFun (Sin a)   x = sin  <$> evalFun a x
+evalFun (Ln a)    x = do
+  a' <- evalFun a x
+  guard (a' <= 0)
+  return (log a')
 
 showexp :: Expression -> String
 showexp X         = "x"
@@ -111,7 +129,7 @@ paren s = "("++s++")"
 simplify :: Expression -> Expression
 simplify X                     = X
 simplify (V d)                 = V d
-simplify (Add a b) 
+simplify (Add a b)
     | isZero (simplify b)      = simplify a
     | isZero (simplify a)      = simplify b
     | otherwise                = Add (simplify a) (simplify b)
