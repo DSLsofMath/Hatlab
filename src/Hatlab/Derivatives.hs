@@ -14,7 +14,6 @@ data Expression = Add  Expression Expression
                 | Sqrt Expression
                 | Ln   Expression
                 | X
-
 x       = X
 v d     = V d
 e .+. f = Add e f
@@ -70,7 +69,7 @@ evalFun (Pow a b) x = pure (**) <*> ((evalFun a x) >>= (\x -> if x >= 0 then Jus
 evalFun (Sqrt a)  x = fmap sqrt $ (evalFun a x) >>= (\x -> if x <= 0 then Nothing else Just x)
 evalFun (Cos a)   x = fmap cos  (evalFun a x)
 evalFun (Sin a)   x = fmap sin  (evalFun a x)
-evalFun (Ln a)    x = fmap log  $ (evalFun a x) >>= (\x -> if x < 0 then Nothing else Just x)
+evalFun (Ln a)    x = fmap log  $ (evalFun a x) >>= (\x -> if x <= 0 then Nothing else Just x)
 
 showexp :: Expression -> String
 showexp X         = "x"
