@@ -80,14 +80,14 @@ evalFun (Pow a b) x = do
 
 evalFun (Sqrt a)  x = do
   a' <- evalFun a x
-  guard (a' <= 0)
+  guard (a' >= 0)
   return (sqrt a')
 
 evalFun (Cos a)   x = cos  <$> evalFun a x
 evalFun (Sin a)   x = sin  <$> evalFun a x
 evalFun (Ln a)    x = do
   a' <- evalFun a x
-  guard (a' <= 0)
+  guard (a' >= 0)
   return (log a')
 
 showexp :: Expression -> String
