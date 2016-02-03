@@ -49,26 +49,42 @@ clear = plotCmd ["clear\n"]
 
 instance Plottable BasicPlot where
   plot [] = return ()
-  plot fs = do clear
-               plotCmd [headers fs]
-               plotCmd (map ((++"e\n") . p) fs)
-    where headers (f : fs) = "plot ["++show a++":"++show b++"] "
-                              ++ concat (intersperse ", " (header "'-' " f : map (header "'' ") fs))
-          -- In this downscaled version (a,b) is always (-1,1)  ...
-              where (a,b) = case f of
-                              _      -> (-1,1)
-          header str (Fun _ lab)    = str ++ " w l lw 2 t " ++ show lab
-          header str (Pts _ _ lab)  = str ++ " w p pt 7 t " ++ show lab
-          header str (Pts2 _ _ lab) = str ++ " w p pt 7 t " ++ show lab
+  plot fs = do
+    clear
+    plotCmd [mkPlot (-1,1) lbl fs]
+    plotCmd (map ((++ "e") . p) fs)
+    where
+      lbl (Fun _ lab)    = " w l lw 2 t " ++ show lab
+      lbl (Pts _ _ lab)  = " w p pt 7 t " ++ show lab
+      lbl (Pts2 _ _ lab) = " w p pt 7 t " ++ show lab
 
-          p :: BasicPlot -> String
-          p (Fun f _) = plotFun xs (V.map f xs)
-              where xs = linspace 1001 (-1,1)      -- Plot interval "hard-coded"
-          p (Pts xs f lab) = plotFun xs (V.map f xs)
-          p (Pts2 xs ys lab) = plotFun xs ys
+      p :: BasicPlot -> String
+      p (Fun f _) = plotPts xs (V.map f xs)
+        where xs = linspace 1001 (-1,1)      -- Plot interval "hard-coded"
+      p (Pts xs f lab) = plotPts xs (V.map f xs)
+      p (Pts2 xs ys lab) = plotPts xs ys
 
-          plotFun xs ys =  V.ifoldr g "\n" xs
-              where g i x ack = show x ++ " " ++ show (ys V.! i) ++ "\n" ++ ack
+
+mkPlot :: (Double, Double) -- limits
+       -> (a -> String) -- plottable thing to label
+       -> [a]
+       -> String
+mkPlot _ _ [] = ""
+mkPlot (a, b) lbl (f:fs) =
+  concat
+    (["plot [",
+      show a,
+      ":",
+      show b,
+      "] "
+     ] ++
+     (intersperse ", "
+      (("'-' " ++ lbl f) :
+       map (("'' " ++) . lbl) fs)))
+
+plotPts :: V.Vector Double -> V.Vector Double -> String
+plotPts xs ys = V.ifoldr g "\n" xs
+  where g i x ack = show x ++ " " ++ show (ys V.! i) ++ "\n" ++ ack
 
 lspace :: Int -> (Double, Double) -> [Double]
 lspace n (a, b) = itr n (\x -> x+h) a
