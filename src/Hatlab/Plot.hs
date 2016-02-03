@@ -45,7 +45,7 @@ data BasicPlot = Fun  (Double -> Double) String
                | Pts  (V.Vector Double)  (Double -> Double) String
                | Pts2 (V.Vector Double)  (V.Vector Double) String
 
-clear = plotCmd ["clear\n"]
+clear = plotCmd ["clear"]
 
 instance Plottable BasicPlot where
   plot [] = return ()
@@ -88,9 +88,10 @@ plotPts xs ys = V.ifoldr g "\n" xs
 
 lspace :: Int -> (Double, Double) -> [Double]
 lspace n (a, b) = itr n (\x -> x+h) a
-    where
-        h = (b-a)/fromIntegral (n-1)
-        itr n = (take n .) . iterate
+  where
+    h = (b-a) / fromIntegral (n-1)
+    itr n = (take n .) . iterate
 
+linspace :: Int -> (Double, Double) -> V.Vector Double
 linspace n (a,b) = V.generate n (\k -> a + fromIntegral (k-1) * h)
-       where h = (b-a)/fromIntegral (n-1)
+  where h = (b-a)/fromIntegral (n-1)
