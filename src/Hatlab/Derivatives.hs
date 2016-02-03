@@ -19,6 +19,7 @@ data Expression = Add      Expression Expression
                 | ATan     Expression
                 | Sqrt     Expression
                 | Ln       Expression
+                | Exp      Expression
                 | Tanh     Expression
                 | Sinh     Expression
                 | Cosh     Expression
@@ -68,9 +69,9 @@ instance Fractional Expression where
     fromRational = v . fromRational
 
 instance Floating Expression where
-    
-   pi  = V pi 
-   exp = (**) (V (exp 1))
+
+   pi  = V pi
+   exp = Exp
    log = ln
    sin = sine
    cos = cose
@@ -99,10 +100,11 @@ derivative (Pow f g) = simplify $ (f .^. g) * (derivative g) * (ln f) + ((f .^. 
 derivative (Sin e)   = simplify $ (derivative e) * (cos e)
 derivative (Cos e)   = simplify $ 0 - (sin e)
 derivative (Sqrt e)  = simplify $ derivative (e .^. 0.5)
+derivative (Exp e)   = simplify $ Exp e * derivative e
 derivative (Ln e)    = simplify $ (derivative e) / e
 derivative (Tan e)   = simplify $ (derivative e) * (1 + (tan e)*(tan e))
 derivative (ASin e)  = simplify $ (derivative e) / (sqrt (1-e*e))
-derivative (ACos e)  = simplify $ (derivative e) / (-1*(sqrt (1-e*e))) 
+derivative (ACos e)  = simplify $ (derivative e) / (-1*(sqrt (1-e*e)))
 derivative (ATan e)  = simplify $ (derivative e) / (e*e+1)
 derivative (Sinh e)  = simplify $ (derivative e) * (cosh e)
 derivative (Cosh e)  = simplify $ (derivative e) * (sinh e)
@@ -116,6 +118,7 @@ evalFun (V d) x     = Just d
 evalFun X x         = Just x
 evalFun (Add a b) x = (+) <$> evalFun a x <*> (evalFun b x)
 evalFun (Mul a b) x = (*) <$> evalFun a x <*> (evalFun b x)
+evalFun (Exp e)   x = exp <$> evalFun e x
 evalFun (Sub a b) x = (-) <$> evalFun a x <*> (evalFun b x)
 evalFun (Cos a)   x = cos <$> evalFun a x
 evalFun (Sin a)   x = sin <$> evalFun a x
@@ -198,6 +201,7 @@ showexp (Pow a b) = (showexp' a) ++ " \\^ " ++ (showexp' b)
         showexp' e       = paren (showexp e)
 showexp (Sin e)   = "sin(" ++ (showexp e)++")"
 showexp (Cos e)   = "cos(" ++ (showexp e)++")"
+showexp (Exp e)   = "exp(" ++ showexp e ++ ")"
 showexp (Ln e)    = "ln(" ++ (showexp e)++")"
 showexp (Sqrt e)  = "sqrt(" ++ (showexp e)++")"
 showexp (Tan e)   = "tan("++(showexp e)++")"
