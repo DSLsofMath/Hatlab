@@ -5,16 +5,26 @@ import Control.Monad (guard)
 
 import Hatlab.Plot
 
-data Expression = Add  Expression Expression
-                | Mul  Expression Expression
-                | Sub  Expression Expression
-                | Div  Expression Expression
-                | V    Double
-                | Pow  Expression Expression
-                | Sin  Expression
-                | Cos  Expression
-                | Sqrt Expression
-                | Ln   Expression
+data Expression = Add      Expression Expression
+                | Mul      Expression Expression
+                | Sub      Expression Expression
+                | Div      Expression Expression
+                | V        Double
+                | Pow      Expression Expression
+                | Sin      Expression
+                | Cos      Expression
+                | Tan      Expression
+                | ASin     Expression
+                | ACos     Expression
+                | ATan     Expression
+                | Sqrt     Expression
+                | Ln       Expression
+                | Tanh     Expression
+                | Sinh     Expression
+                | Cosh     Expression
+                | ATanh    Expression
+                | ACosh    Expression
+                | ASinh    Expression
                 | X
 
 x       = X
@@ -25,6 +35,16 @@ e .*. f = Mul e f
 e ./. f = Div e f
 cose e  = Cos e
 sine e  = Sin e
+tane e  = Tan e
+atane e = ATan e
+acose e = ACos e
+asine e = ASin e
+sinhe e = Sinh e
+coshe e = Cosh e
+tanhe e = Tanh e
+asinhe e = ASinh e
+acoshe e = ACosh e
+atanhe e = ATanh e
 e .^. f = Pow e f
 sqrte e = Sqrt e
 ln e    = Ln e
@@ -47,6 +67,27 @@ instance Fractional Expression where
 
     fromRational = v . fromRational
 
+instance Floating Expression where
+    
+   pi  = V pi 
+   exp = (**) (V (exp 1))
+   log = ln
+   sin = sine
+   cos = cose
+   tan = tane
+   asin = asine
+   acos = acose
+   atan = atane
+   sinh = sinhe
+   cosh = coshe
+   tanh = tanhe
+   asinh = asinhe
+   acosh = acoshe
+   atanh = atanhe
+   sqrt = sqrte
+   (**) = (.^.)
+
+
 derivative :: Expression -> Expression
 derivative (V d)     = 0
 derivative X         = 1
@@ -55,17 +96,46 @@ derivative (Sub a b) = simplify $ (derivative a) - (derivative b)
 derivative (Mul a b) = simplify $ (a * (derivative b)) + ((derivative a) * b)
 derivative (Div a b) = simplify $ ((b .*. (derivative a)) - (a * (derivative b))) / (b * b)
 derivative (Pow f g) = simplify $ (f .^. g) * (derivative g) * (ln f) + ((f .^. (g - 1)) * g * (derivative f))
-derivative (Sin e)   = simplify $ (derivative e) * (cose e)
-derivative (Cos e)   = simplify $ 0 - (sine e)
+derivative (Sin e)   = simplify $ (derivative e) * (cos e)
+derivative (Cos e)   = simplify $ 0 - (sin e)
 derivative (Sqrt e)  = simplify $ derivative (e .^. 0.5)
 derivative (Ln e)    = simplify $ (derivative e) / e
+derivative (Tan e)   = simplify $ (derivative e) * (1 + (tan e)*(tan e))
+derivative (ASin e)  = simplify $ (derivative e) / (sqrt (1-e*e))
+derivative (ACos e)  = simplify $ (derivative e) / (-1*(sqrt (1-e*e))) 
+derivative (ATan e)  = simplify $ (derivative e) / (e*e+1)
+derivative (Sinh e)  = simplify $ (derivative e) * (cosh e)
+derivative (Cosh e)  = simplify $ (derivative e) * (sinh e)
+derivative (Tanh e)  = simplify $ (derivative e) / (cosh e)
+derivative (ASinh e) = simplify $ (derivative e) / (sqrt (e*e+1))
+derivative (ACosh e) = simplify $ (derivative e) / (sqrt (e*e-1))
+derivative (ATanh e) = simplify $ (derivative e) / (1 - e*e)
 
 evalFun :: Expression -> Double -> Maybe Double
 evalFun (V d) x     = Just d
 evalFun X x         = Just x
-evalFun (Add a b) x = (+)  <$> evalFun a x <*> (evalFun b x)
-evalFun (Mul a b) x = (*)  <$> evalFun a x <*> (evalFun b x)
-evalFun (Sub a b) x = (-)  <$> evalFun a x <*> (evalFun b x)
+evalFun (Add a b) x = (+) <$> evalFun a x <*> (evalFun b x)
+evalFun (Mul a b) x = (*) <$> evalFun a x <*> (evalFun b x)
+evalFun (Sub a b) x = (-) <$> evalFun a x <*> (evalFun b x)
+evalFun (Cos a)   x = cos <$> evalFun a x
+evalFun (Sin a)   x = sin <$> evalFun a x
+evalFun (Tan a)   x = tan <$> evalFun a x
+evalFun (ATan a) x  = atan <$> evalFun a x
+evalFun (Tanh a) x  = tanh <$> evalFun a x
+evalFun (Sinh a) x  = sinh <$> evalFun a x
+evalFun (Cosh a) x  = cosh <$> evalFun a x
+evalFun (ASinh a) x = asinh <$> evalFun a x
+
+evalFun (ATanh a) x = do
+  a' <- evalFun a x
+  guard (abs a' < 1)
+  return (atanh a')
+
+evalFun (ACosh a) x = do
+  a' <- evalFun a x
+  guard (a' >= 1)
+  return (acosh a')
+
 evalFun (Div a b) x = do
   a' <- evalFun a x
   b' <- evalFun b x
@@ -83,12 +153,20 @@ evalFun (Sqrt a)  x = do
   guard (a' >= 0)
   return (sqrt a')
 
-evalFun (Cos a)   x = cos  <$> evalFun a x
-evalFun (Sin a)   x = sin  <$> evalFun a x
 evalFun (Ln a)    x = do
   a' <- evalFun a x
   guard (a' >= 0)
   return (log a')
+
+evalFun (ACos a)  x = do
+  a' <- evalFun a x
+  guard (abs a' < 1)
+  return (acos a')
+
+evalFun (ASin a)  x = do
+  a' <- evalFun a x
+  guard (abs a' < 1)
+  return (asin a')
 
 showexp :: Expression -> String
 showexp X         = "x"
@@ -122,6 +200,16 @@ showexp (Sin e)   = "sin(" ++ (showexp e)++")"
 showexp (Cos e)   = "cos(" ++ (showexp e)++")"
 showexp (Ln e)    = "ln(" ++ (showexp e)++")"
 showexp (Sqrt e)  = "sqrt(" ++ (showexp e)++")"
+showexp (Tan e)   = "tan("++(showexp e)++")"
+showexp (ACos e)  = "acos("++(showexp e)++")"
+showexp (ASin e)  = "asin("++(showexp e)++")"
+showexp (ATan e)  = "atan("++(showexp e)++")"
+showexp (Tanh e)  = "tanh("++(showexp e)++")"
+showexp (Cosh e)  = "cosh("++(showexp e)++")"
+showexp (Sinh e)  = "sinh("++(showexp e)++")"
+showexp (ASinh e) = "asinh("++(showexp e)++")"
+showexp (ACosh e) = "acosh("++(showexp e)++")"
+showexp (ATanh e) = "atanh("++(showexp e)++")"
 
 paren :: String -> String
 paren s = "("++s++")"
