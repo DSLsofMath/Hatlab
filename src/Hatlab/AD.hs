@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 -- | Simple automatic differentiation, with only first order
 -- derivatives
 module Hatlab.AD where
@@ -6,7 +7,7 @@ import Hatlab.Plot
 
 -- | |D f f'|, f is the value and f' is the value of the derivative
 data D a = D a a
-  deriving Show
+  deriving (Show, Functor)
 
 
 idD :: Num a => a -> D a
