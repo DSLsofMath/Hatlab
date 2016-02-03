@@ -8,9 +8,13 @@ data D a = D a a
   deriving Show
 
 
+idD :: Num a => a -> D a
 idD x = D x 1
+
+constD :: Num a => a -> D a
 constD c = D c 0
 
+chainRule :: Num a => (a -> a) -> (a -> a) -> D a -> D a
 chainRule f f' (D g g') = D (f g) (f' g * g')
 
 instance Num a => Num (D a) where
@@ -24,6 +28,7 @@ instance Num a => Num (D a) where
   signum = chainRule signum (const 0)
   abs    = chainRule abs signum
 
+sqr :: Num a => a -> a
 sqr x = x * x
 
 instance Fractional a => Fractional (D a) where
@@ -36,9 +41,18 @@ instance Floating a => Floating (D a) where
   sqrt = chainRule sqrt undefined
 
   exp = chainRule exp exp
+  log = chainRule log recip
 
   sin = chainRule sin cos
   cos = chainRule cos (negate . sin)
 
   asin = chainRule asin (recip . sqrt . (1 -) . sqr)
-  acos = chainRule acos (negate . recip . sqrt . (1 - ) . sqr)
+  acos = chainRule acos (negate . recip . sqrt . (1 -) . sqr)
+  atan = undefined
+
+  sinh = chainRule sinh cosh
+  cosh = chainRule cosh sinh
+
+  asinh = chainRule asinh (recip . sqrt . (+ 1) . sqr)
+  acosh = chainRule acosh (recip . sqrt . (\x -> x - 1) . sqr)
+  atanh = chainRule atanh (recip . (1 -) . sqr)
