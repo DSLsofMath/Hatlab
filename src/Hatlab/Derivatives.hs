@@ -9,7 +9,6 @@ data Expression = Add      Expression Expression
                 | Mul      Expression Expression
                 | Sub      Expression Expression
                 | Div      Expression Expression
-                | V        Double
                 | Pow      Expression Expression
                 | Sin      Expression
                 | Cos      Expression
@@ -26,67 +25,71 @@ data Expression = Add      Expression Expression
                 | ATanh    Expression
                 | ACosh    Expression
                 | ASinh    Expression
+                | V        Double
                 | X
 
-x       = X
-v d     = V d
-e .+. f = Add e f
-e .-. f = Sub e f
-e .*. f = Mul e f
-e ./. f = Div e f
-cose e  = Cos e
-sine e  = Sin e
-tane e  = Tan e
-atane e = ATan e
-acose e = ACos e
-asine e = ASin e
-sinhe e = Sinh e
-coshe e = Cosh e
-tanhe e = Tanh e
-asinhe e = ASinh e
-acoshe e = ACosh e
-atanhe e = ATanh e
-e .^. f = Pow e f
-sqrte e = Sqrt e
-ln e    = Ln e
+x = X
 
 instance Num Expression where
 
-    (+) = (.+.)
-    (*) = (.*.)
-    (-) = (.-.)
+    (+) = Add
+    (*) = Mul
+    (-) = Sub
 
-    negate e = 0 .-. e
-    abs e    = sqrte (e * e)
-    signum e = e ./. (abs e)
+    negate e = 0 - e
+    abs e    = sqrt (e * e)
+    signum e = e / (abs e)
 
-    fromInteger = v . fromInteger
+    fromInteger = V . fromInteger
 
 instance Fractional Expression where
 
-    (/)     = (./.)
+    (/)     = Div
 
-    fromRational = v . fromRational
+    fromRational = V . fromRational
 
 instance Floating Expression where
 
-   pi  = V pi
-   exp = Exp
-   log = ln
-   sin = sine
-   cos = cose
-   tan = tane
-   asin = asine
-   acos = acose
-   atan = atane
-   sinh = sinhe
-   cosh = coshe
-   tanh = tanhe
-   asinh = asinhe
-   acosh = acoshe
-   atanh = atanhe
-   sqrt = sqrte
-   (**) = (.^.)
+    pi  = V pi
+    exp = Exp
+    log = Ln 
+    sin = Sin
+    cos = Cos
+    tan = Tan
+    asin = ASin
+    acos = ACos
+    atan = ATan
+    sinh = Sinh
+    cosh = Cosh
+    tanh = Tanh
+    asinh = ASinh
+    acosh = ACosh
+    atanh = ATanh
+    sqrt = Sqrt
+    (**) = Pow
+
+exprAt :: Expression -> Expression -> Expression
+exprAt (V d) v     = V d
+exprAt X     v     = v
+exprAt (Add e f) v = Add      (exprAt e v) (exprAt f v)
+exprAt (Sub e f) v = Sub      (exprAt e v) (exprAt f v)
+exprAt (Mul e f) v = Mul      (exprAt e v) (exprAt f v)
+exprAt (Div e f) v = Div      (exprAt e v) (exprAt f v)
+exprAt (Pow e f) v = Pow      (exprAt e v) (exprAt f v)
+exprAt (Exp e)   v = Exp      (exprAt e v) 
+exprAt (Sin e)   v = Sin      (exprAt e v) 
+exprAt (Cos e)   v = Cos      (exprAt e v) 
+exprAt (Tan e)   v = Tan      (exprAt e v) 
+exprAt (ASin e)  v = ASin     (exprAt e v) 
+exprAt (ACos e)  v = ACos     (exprAt e v) 
+exprAt (ATan e)  v = ATan     (exprAt e v) 
+exprAt (Tanh e)  v = Tanh     (exprAt e v) 
+exprAt (Sinh e)  v = Sinh     (exprAt e v) 
+exprAt (Cosh e)  v = Cosh     (exprAt e v) 
+exprAt (ACosh e) v = ACosh    (exprAt e v) 
+exprAt (ASinh e) v = ASinh    (exprAt e v) 
+exprAt (ATanh e) v = ATanh    (exprAt e v) 
+exprAt (Ln e)    v = Ln       (exprAt e v) 
 
 
 derivative :: Expression -> Expression
@@ -95,11 +98,11 @@ derivative X         = 1
 derivative (Add a b) = simplify $ (derivative a) + (derivative b)
 derivative (Sub a b) = simplify $ (derivative a) - (derivative b)
 derivative (Mul a b) = simplify $ (a * (derivative b)) + ((derivative a) * b)
-derivative (Div a b) = simplify $ ((b .*. (derivative a)) - (a * (derivative b))) / (b * b)
-derivative (Pow f g) = simplify $ (f .^. g) * (derivative g) * (ln f) + ((f .^. (g - 1)) * g * (derivative f))
+derivative (Div a b) = simplify $ ((b * (derivative a)) - (a * (derivative b))) / (b * b)
+derivative (Pow f g) = simplify $ (f ** g) * (derivative g) * (log f) + ((f ** (g - 1)) * g * (derivative f))
 derivative (Sin e)   = simplify $ (derivative e) * (cos e)
 derivative (Cos e)   = simplify $ 0 - (sin e)
-derivative (Sqrt e)  = simplify $ derivative (e .^. 0.5)
+derivative (Sqrt e)  = simplify $ derivative (e ** 0.5)
 derivative (Exp e)   = simplify $ Exp e * derivative e
 derivative (Ln e)    = simplify $ (derivative e) / e
 derivative (Tan e)   = simplify $ (derivative e) * (1 + (tan e)*(tan e))
