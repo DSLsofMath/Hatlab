@@ -52,7 +52,7 @@ instance Floating Expression where
 
     pi  = V pi
     exp = Exp
-    log = Ln 
+    log = Ln
     sin = Sin
     cos = Cos
     tan = Tan
@@ -76,20 +76,20 @@ exprAt (Sub e f) v = Sub      (exprAt e v) (exprAt f v)
 exprAt (Mul e f) v = Mul      (exprAt e v) (exprAt f v)
 exprAt (Div e f) v = Div      (exprAt e v) (exprAt f v)
 exprAt (Pow e f) v = Pow      (exprAt e v) (exprAt f v)
-exprAt (Exp e)   v = Exp      (exprAt e v) 
-exprAt (Sin e)   v = Sin      (exprAt e v) 
-exprAt (Cos e)   v = Cos      (exprAt e v) 
-exprAt (Tan e)   v = Tan      (exprAt e v) 
-exprAt (ASin e)  v = ASin     (exprAt e v) 
-exprAt (ACos e)  v = ACos     (exprAt e v) 
-exprAt (ATan e)  v = ATan     (exprAt e v) 
-exprAt (Tanh e)  v = Tanh     (exprAt e v) 
-exprAt (Sinh e)  v = Sinh     (exprAt e v) 
-exprAt (Cosh e)  v = Cosh     (exprAt e v) 
-exprAt (ACosh e) v = ACosh    (exprAt e v) 
-exprAt (ASinh e) v = ASinh    (exprAt e v) 
-exprAt (ATanh e) v = ATanh    (exprAt e v) 
-exprAt (Ln e)    v = Ln       (exprAt e v) 
+exprAt (Exp e)   v = Exp      (exprAt e v)
+exprAt (Sin e)   v = Sin      (exprAt e v)
+exprAt (Cos e)   v = Cos      (exprAt e v)
+exprAt (Tan e)   v = Tan      (exprAt e v)
+exprAt (ASin e)  v = ASin     (exprAt e v)
+exprAt (ACos e)  v = ACos     (exprAt e v)
+exprAt (ATan e)  v = ATan     (exprAt e v)
+exprAt (Tanh e)  v = Tanh     (exprAt e v)
+exprAt (Sinh e)  v = Sinh     (exprAt e v)
+exprAt (Cosh e)  v = Cosh     (exprAt e v)
+exprAt (ACosh e) v = ACosh    (exprAt e v)
+exprAt (ASinh e) v = ASinh    (exprAt e v)
+exprAt (ATanh e) v = ATanh    (exprAt e v)
+exprAt (Ln e)    v = Ln       (exprAt e v)
 
 
 derivative :: Expression -> Expression
@@ -221,7 +221,9 @@ showexp (ATanh e) = "atanh("++(showexp e)++")"
 paren :: String -> String
 paren s = "("++s++")"
 
-simplify :: Expression -> Expression
+type SimplExpr = Expression
+
+simplify :: Expression -> SimplExpr
 simplify X                     = X
 simplify (V d)                 = V d
 simplify (Add a b)
@@ -247,28 +249,27 @@ simplify (Pow a b)
     | isOne (simplify b)       = a
 simplify e                     = e
 
-isOne :: Expression -> Bool
-isOne X         = False
-isOne (V d)     = d == 1
-isOne (Add a b) = ((isOne a) && (isZero b)) || ((isOne b) && (isZero a))
-isOne (Sub a b) = (isZero b) && (isOne a)
-isOne (Mul a b) = (isOne a) && (isOne b)
-isOne (Div a b) = (isOne a) && (isOne b)
-isOne (Pow a b) = (isOne a) || (isZero b)
-isOne (Cos a)   = (isZero a)
-isOne e         = False
+isOne :: SimplExpr -> Bool
+isOne (V d)     =  d == 1
+isOne (Add a b) = (isOne a  &&  isZero b) || (isOne b  &&  isZero a)
+isOne (Sub a b) =  isOne a  &&  isZero b
+isOne (Mul a b) =  isOne a  &&  isOne b
+isOne (Div a b) =  isOne a  &&  isOne b
+isOne (Pow a b) =  isOne a  ||  isZero b
+isOne (Exp a)   =  isZero a
+isOne (Cos a)   =  isZero a
+isOne e         =  False
 
-isZero :: Expression -> Bool
-isZero X         = False
-isZero (V d)     = d == 0
-isZero (Add a b) = (isZero a) && (isZero b)
-isZero (Sub a b) = (isOne a) && (isOne b)
-isZero (Mul a b) = (isZero a) || (isZero b)
-isZero (Div a b) = isZero a
-isZero (Pow a b) = isZero a
-isZero (Ln a)    = isOne a
-isZero (Sin a)   = isZero a
-isZero e         = False
+isZero :: SimplExpr -> Bool
+isZero (V d)     =  d == 0
+isZero (Add a b) =  isZero a  &&  isZero b
+isZero (Sub a b) =  isOne a   &&  isOne b
+isZero (Mul a b) =  isZero a  ||  isZero b
+isZero (Div a b) =  isZero a
+isZero (Pow a b) =  isZero a
+isZero (Ln a)    =  isOne a
+isZero (Sin a)   =  isZero a
+isZero e         =  False
 
 instance Show Expression where
     show = showexp
