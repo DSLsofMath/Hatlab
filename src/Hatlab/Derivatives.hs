@@ -10,6 +10,7 @@ data Expression = Add      Expression Expression
                 | Sub      Expression Expression
                 | Div      Expression Expression
                 | Pow      Expression Expression
+                | Negate   Expression
                 | Sin      Expression
                 | Cos      Expression
                 | Tan      Expression
@@ -36,7 +37,7 @@ instance Num Expression where
     (*) = Mul
     (-) = Sub
 
-    negate e = 0 - e
+    negate = Negate
     abs e    = sqrt (e * e)
     signum e = e / (abs e)
 
@@ -73,6 +74,7 @@ exprAt (V d) v     = V d
 exprAt X     v     = v
 exprAt (Add e f) v = Add      (exprAt e v) (exprAt f v)
 exprAt (Sub e f) v = Sub      (exprAt e v) (exprAt f v)
+exprAt (Negate e)v = Negate   (exprAt e v)
 exprAt (Mul e f) v = Mul      (exprAt e v) (exprAt f v)
 exprAt (Div e f) v = Div      (exprAt e v) (exprAt f v)
 exprAt (Pow e f) v = Pow      (exprAt e v) (exprAt f v)
@@ -97,11 +99,12 @@ derivative (V d)     = 0
 derivative X         = 1
 derivative (Add a b) = simplify $ (derivative a) + (derivative b)
 derivative (Sub a b) = simplify $ (derivative a) - (derivative b)
+derivative (Negate a)= simplify $ negate (derivative a)
 derivative (Mul a b) = simplify $ (a * (derivative b)) + ((derivative a) * b)
 derivative (Div a b) = simplify $ ((b * (derivative a)) - (a * (derivative b))) / (b * b)
 derivative (Pow f g) = simplify $ (f ** g) * (derivative g) * (log f) + ((f ** (g - 1)) * g * (derivative f))
 derivative (Sin e)   = simplify $ (derivative e) * (cos e)
-derivative (Cos e)   = simplify $ 0 - (sin e)
+derivative (Cos e)   = simplify $ negate (sin e)
 derivative (Sqrt e)  = simplify $ derivative (e ** 0.5)
 derivative (Exp e)   = simplify $ Exp e * derivative e
 derivative (Ln e)    = simplify $ (derivative e) / e
@@ -119,10 +122,11 @@ derivative (ATanh e) = simplify $ (derivative e) / (1 - e*e)
 evalFun :: Expression -> Double -> Maybe Double
 evalFun (V d) x     = Just d
 evalFun X x         = Just x
-evalFun (Add a b) x = (+) <$> evalFun a x <*> (evalFun b x)
-evalFun (Mul a b) x = (*) <$> evalFun a x <*> (evalFun b x)
+evalFun (Add a b) x = (+) <$> evalFun a x <*> evalFun b x
+evalFun (Mul a b) x = (*) <$> evalFun a x <*> evalFun b x
 evalFun (Exp e)   x = exp <$> evalFun e x
-evalFun (Sub a b) x = (-) <$> evalFun a x <*> (evalFun b x)
+evalFun (Sub a b) x = (-) <$> evalFun a x <*> evalFun b x
+evalFun (Negate a)x = negate <$> evalFun a x
 evalFun (Cos a)   x = cos <$> evalFun a x
 evalFun (Sin a)   x = sin <$> evalFun a x
 evalFun (Tan a)   x = tan <$> evalFun a x
@@ -202,6 +206,7 @@ showexp (Pow a b) = (showexp' a) ++ " \\^ " ++ (showexp' b)
         showexp' (Sin e) = showexp (Sin e)
         showexp' (Ln e)  = showexp (Ln e)
         showexp' e       = paren (showexp e)
+showexp (Negate e)= "-(" ++ (showexp e)++")"
 showexp (Sin e)   = "sin(" ++ (showexp e)++")"
 showexp (Cos e)   = "cos(" ++ (showexp e)++")"
 showexp (Exp e)   = "exp(" ++ showexp e ++ ")"
@@ -232,6 +237,7 @@ simplify (Add a b)
     | otherwise                = Add (simplify a) (simplify b)
 simplify (Sub a b)
     | isZero (simplify b)      = a
+    | isZero (simplify a)      = Negate (simplify b)
     | otherwise                = Sub (simplify a) (simplify b)
 simplify (Mul a b)
     | isZero (simplify a)      = 0
@@ -247,6 +253,9 @@ simplify (Pow a b)
     | isZero (simplify a)      = 1
     | isZero (simplify b)      = 1
     | isOne (simplify b)       = a
+simplify (Negate e)
+  | isZero e                   = 0
+simplify (Negate (Negate e))   = simplify e
 simplify e                     = e
 
 isOne :: SimplExpr -> Bool
