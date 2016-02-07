@@ -64,14 +64,6 @@ fun f = f . constD
 
 data ADPlot = AD (D Double -> D Double) String
 
-instance Plottable ADPlot where
-  plot [] = return ()
-  plot fs = do
-    clear
-    plotCmd [mkPlot (-1,1) lbl fs]
-    plotCmd (map ((++ "e") . p) fs]
-    -- plotCmd ["plot [-1:1]
-    where
-      ls = linspace 1001 (-1, 1)
-      lbl (ADPlot _ l) = " w l lw 2 t " ++ show l
-      p (ADPlot f _) = let
+-- instance Plottable ADPlot where
+--   plot [] = return ()
+--   plot fs = undefined
