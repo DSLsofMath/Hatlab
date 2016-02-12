@@ -16,6 +16,7 @@ library
                        Hatlab.Relations,
                        Hatlab.ParametricCurves,
                        Hatlab.Derivatives,
+                       Hatlab.SimplifyUniplate,
                        Examples.Shapes,
                        Examples.Parametric,
                        Examples.Sets

@@ -3,7 +3,8 @@ module Hatlab.SimplifyUniplate where
 
 import Data.Generics.Uniplate.Data
 
-import Hatlab.Derivatives hiding (simplify)
+import Hatlab.Derivatives hiding (simplify, exprAt)
+import qualified Hatlab.Derivatives as D
 
 simplify :: Expression -> Expression
 simplify = transform f
@@ -29,3 +30,7 @@ simplify = transform f
     f (Negate e)
       | isZero e = 0
     f e = e
+
+exprAt e v = transform f e
+  where f X = v
+        f e = e
