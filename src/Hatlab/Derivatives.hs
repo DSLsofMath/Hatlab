@@ -31,7 +31,7 @@ data Expression
   | ASinh    Expression
   | V        Double
   | X
-  deriving (Data, Typeable)
+  deriving (Eq, Data, Typeable)
 
 x = X
 
@@ -96,6 +96,7 @@ exprAt (ACosh e) v = ACosh    (exprAt e v)
 exprAt (ASinh e) v = ASinh    (exprAt e v)
 exprAt (ATanh e) v = ATanh    (exprAt e v)
 exprAt (Ln e)    v = Ln       (exprAt e v)
+exprAt (Sqrt e)  v = Sqrt     (exprAt e v)
 
 
 derivative :: Expression -> Expression
