@@ -1,33 +1,37 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 module Hatlab.Derivatives where
 
 import Control.Monad (guard)
+import Data.Data
 
 import Hatlab.Plot
 
-data Expression = Add      Expression Expression
-                | Mul      Expression Expression
-                | Sub      Expression Expression
-                | Div      Expression Expression
-                | Pow      Expression Expression
-                | Negate   Expression
-                | Sin      Expression
-                | Cos      Expression
-                | Tan      Expression
-                | ASin     Expression
-                | ACos     Expression
-                | ATan     Expression
-                | Sqrt     Expression
-                | Ln       Expression
-                | Exp      Expression
-                | Tanh     Expression
-                | Sinh     Expression
-                | Cosh     Expression
-                | ATanh    Expression
-                | ACosh    Expression
-                | ASinh    Expression
-                | V        Double
-                | X
+data Expression
+  = Add      Expression Expression
+  | Mul      Expression Expression
+  | Sub      Expression Expression
+  | Div      Expression Expression
+  | Pow      Expression Expression
+  | Negate   Expression
+  | Sin      Expression
+  | Cos      Expression
+  | Tan      Expression
+  | ASin     Expression
+  | ACos     Expression
+  | ATan     Expression
+  | Sqrt     Expression
+  | Ln       Expression
+  | Exp      Expression
+  | Tanh     Expression
+  | Sinh     Expression
+  | Cosh     Expression
+  | ATanh    Expression
+  | ACosh    Expression
+  | ASinh    Expression
+  | V        Double
+  | X
+  deriving (Data, Typeable)
 
 x = X
 
