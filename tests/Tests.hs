@@ -1,7 +1,7 @@
 module Main where
 
-import Hatlab.Derivatives
-import qualified Hatlab.SimplifyUniplate as U
+import Hatlab.Expression
+import qualified Hatlab.Expression.Uniplate as U
 import Test.QuickCheck
 
 instance Arbitrary Expression where
