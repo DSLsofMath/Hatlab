@@ -36,14 +36,19 @@ module defines a small DSL for relations. The supported operations are:
 `r` defines a basic relation. Some operations on relations
 are supported:
 <br>
-`r .\/. q = r ∪ q `
+`a .\/. b = a ∪ b `
 <br>
-`r ./\. q = r ∩ q `
+`a ./\. b = a ∩ b `
 <br>
-`c r      = compliment of r`
+`c a      = compliment of a`
 <br>
-`r .\.  q = r minus q `
+`a .\.  b = a minus b `
 <br>
+We can plot relations with a similar command as for functions:
+
+    > let q = r (\x y -> x == y) "Line"
+    > let w = r (\x y -> x*x+y*y <= 1) "Disc"
+    > plot [q, w]
 
 [1]: http://www.gnuplot.info
 [2]: http://brew.sh
