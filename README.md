@@ -31,7 +31,7 @@ Default plot interval is [-1,1].
 Hatlab supports plotting of relations on the real numbers. The Hatlab.Relations
 module defines a small DSL for relations. The supported operations are:
 
-`r :: (Double -> Double -> Bool) -> String -> Relation` 
+`r :: (Double -> Double -> Bool) -> String -> Relation`
 <br>
 `r` defines a basic relation. Some operations on relations
 are supported:
@@ -50,6 +50,9 @@ We can plot relations with a similar command as for functions:
     > let w = r (\x y -> x*x+y*y <= 1) "Disc"
     > plot [q, w]
 
+![example relation plot][4]
+
 [1]: http://www.gnuplot.info
 [2]: http://brew.sh
 [3]: example.png
+[4]: example2.png
