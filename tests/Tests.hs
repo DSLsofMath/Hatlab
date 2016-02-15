@@ -1,6 +1,7 @@
 module Main where
 
-import Hatlab.Derivatives
+import Hatlab.Expression
+import qualified Hatlab.Expression.Uniplate as U
 import Test.QuickCheck
 
 instance Arbitrary Expression where
@@ -25,4 +26,6 @@ instance Arbitrary Expression where
 
 prop_simplify e x = evalFun e x == evalFun (simplify e) x
 
-main = quickCheck prop_simplify
+prop_exprAtEq = \e x -> exprAt e x == U.exprAt e x
+
+main = quickCheck prop_exprAtEq
