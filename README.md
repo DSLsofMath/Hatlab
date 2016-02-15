@@ -32,18 +32,18 @@ Hatlab supports plotting of relations on the real numbers. The Hatlab.Relations
 module defines a small DSL for relations. The supported operations are:
 
 `r :: (Double -> Double -> Bool) -> String -> Relation` 
-<br\>
+<br>
 `r` defines a basic relation. Some operations on relations
 are supported:
-<br\>
+<br>
 `r .\/. q = r ∪ q `
-<br\>
+<br>
 `r ./\. q = r ∩ q `
-<br\>
+<br>
 `c r      = compliment of r`
-<br\>
+<br>
 `r .\.  q = r minus q `
-<br\>
+<br>
 
 [1]: http://www.gnuplot.info
 [2]: http://brew.sh
