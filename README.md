@@ -20,6 +20,7 @@ or
 
 `cabal repl` or `stack ghci` then
 
+    > :m Hatlab.Plot
     > plot [Fun (sin.(pi*)) "sin", Fun (cos.(pi*)) "cos"]
 
 Default plot interval is [-1,1].
@@ -40,7 +41,7 @@ are supported:
 <br>
 `a ./\. b = a ∩ b `
 <br>
-`c a      = compliment of a`
+`c a      = complement of a`
 <br>
 `a .\.  b = a minus b `
 <br>
