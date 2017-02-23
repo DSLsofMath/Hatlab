@@ -211,10 +211,7 @@ type SimplExpr = Expression
 simplify :: Expression -> SimplExpr
 simplify X                     = X
 simplify (V d)                 = V d
-simplify (Add a b)
-    | isZero (simplify b)      = simplify a
-    | isZero (simplify a)      = simplify b
-    | otherwise                = Add (simplify a) (simplify b)
+simplify (Add a b)             = simpAdd (simplify a) (simplify b)
 simplify (Sub a b)
     | isZero (simplify b)      = a
     | isZero (simplify a)      = Negate (simplify b)
@@ -237,6 +234,16 @@ simplify (Negate e)
   | isZero e                   = 0
 simplify (Negate (Negate e))   = simplify e
 simplify e                     = e
+
+
+-- TODO: Several steps more can be implemented: e+e => 2*e, combining constants, etc.
+simpAdd :: SimplExpr -> SimplExpr -> SimplExpr
+simpAdd X X       = 2*X
+simpAdd a b
+  | isZero b      = a
+  | isZero a      = b
+  | otherwise     = Add a b
+
 
 isOne :: SimplExpr -> Bool
 isOne (V d)     =  d == 1
